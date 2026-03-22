@@ -1,11 +1,11 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate;
+namespace Badrsh\FilamentAiAutofill;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
-class FilamentAiTranslatePlugin implements Plugin
+class FilamentAiAutofillPlugin implements Plugin
 {
     protected ?string $sourceLocale = null;
 
@@ -22,7 +22,7 @@ class FilamentAiTranslatePlugin implements Plugin
 
     public function getId(): string
     {
-        return 'filament-ai-translate';
+        return 'filament-ai-autofill';
     }
 
     /**
@@ -67,15 +67,15 @@ class FilamentAiTranslatePlugin implements Plugin
     public function boot(Panel $panel): void
     {
         if ($this->sourceLocale !== null) {
-            config()->set('filament-ai-translate.source_locale', $this->sourceLocale);
+            config()->set('filament-ai-autofill.source_locale', $this->sourceLocale);
         }
 
         if ($this->targetLocales !== null) {
-            config()->set('filament-ai-translate.target_locales', $this->targetLocales);
+            config()->set('filament-ai-autofill.target_locales', $this->targetLocales);
         }
 
         if ($this->translator !== null) {
-            config()->set('filament-ai-translate.translator', $this->translator);
+            config()->set('filament-ai-autofill.translator', $this->translator);
         }
     }
 }

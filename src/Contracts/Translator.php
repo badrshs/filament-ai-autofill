@@ -1,6 +1,6 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Contracts;
+namespace Badrsh\FilamentAiAutofill\Contracts;
 
 interface Translator
 {

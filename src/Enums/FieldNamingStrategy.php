@@ -1,6 +1,6 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Enums;
+namespace Badrsh\FilamentAiAutofill\Enums;
 
 enum FieldNamingStrategy: string
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Translators;
+namespace Badrsh\FilamentAiAutofill\Translators;
 
-use Badrsh\FilamentAiTranslate\Contracts\Translator;
+use Badrsh\FilamentAiAutofill\Contracts\Translator;
 
 /**
  * A no-op translator useful for testing and development.

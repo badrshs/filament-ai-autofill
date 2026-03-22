@@ -1,14 +1,14 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate;
+namespace Badrsh\FilamentAiAutofill;
 
-use Badrsh\FilamentAiTranslate\Contracts\Translator;
+use Badrsh\FilamentAiAutofill\Contracts\Translator;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class FilamentAiTranslateServiceProvider extends PackageServiceProvider
+class FilamentAiAutofillServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'filament-ai-translate';
+    public static string $name = 'filament-ai-autofill';
 
     public function configurePackage(Package $package): void
     {
@@ -21,7 +21,7 @@ class FilamentAiTranslateServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->bind(Translator::class, function ($app) {
-            $class = config('filament-ai-translate.translator');
+            $class = config('filament-ai-autofill.translator');
 
             return $app->make($class);
         });

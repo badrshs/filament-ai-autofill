@@ -1,6 +1,6 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Support;
+namespace Badrsh\FilamentAiAutofill\Support;
 
 /**
  * Immutable value object holding the translation field mapping configuration.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Actions;
+namespace Badrsh\FilamentAiAutofill\Actions;
 
 use Closure;
 use Exception;
@@ -9,10 +9,10 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
-use Badrsh\FilamentAiTranslate\Contracts\Translator;
-use Badrsh\FilamentAiTranslate\Enums\FieldNamingStrategy;
-use Badrsh\FilamentAiTranslate\Support\FieldMapper;
-use Badrsh\FilamentAiTranslate\Support\TranslationConfig;
+use Badrsh\FilamentAiAutofill\Contracts\Translator;
+use Badrsh\FilamentAiAutofill\Enums\FieldNamingStrategy;
+use Badrsh\FilamentAiAutofill\Support\FieldMapper;
+use Badrsh\FilamentAiAutofill\Support\TranslationConfig;
 
 /**
  * Batch translation action that translates multiple source fields at once.
@@ -73,7 +73,7 @@ class TranslateBatchAction extends Action
         parent::setUp();
 
         $this
-            ->label(fn(): string => __('filament-ai-translate::ai-translate.actions.translate_all'))
+            ->label(fn(): string => __('filament-ai-autofill::ai-autofill.actions.translate_all'))
             ->icon('heroicon-m-sparkles')
             ->color('primary')
             ->action(function (Get $get, Set $set): void {
@@ -188,7 +188,7 @@ class TranslateBatchAction extends Action
 
             if (empty($config->fieldMap)) {
                 Notification::make()
-                    ->title(__('filament-ai-translate::ai-translate.notifications.no_content'))
+                    ->title(__('filament-ai-autofill::ai-autofill.notifications.no_content'))
                     ->warning()
                     ->send();
 
@@ -208,7 +208,7 @@ class TranslateBatchAction extends Action
 
             if (empty($dataToTranslate)) {
                 Notification::make()
-                    ->title(__('filament-ai-translate::ai-translate.notifications.no_content'))
+                    ->title(__('filament-ai-autofill::ai-autofill.notifications.no_content'))
                     ->warning()
                     ->send();
 
@@ -239,7 +239,7 @@ class TranslateBatchAction extends Action
             }
 
             Notification::make()
-                ->title(__('filament-ai-translate::ai-translate.notifications.translating'))
+                ->title(__('filament-ai-autofill::ai-autofill.notifications.translating'))
                 ->info()
                 ->send();
 
@@ -262,17 +262,17 @@ class TranslateBatchAction extends Action
             }
 
             Notification::make()
-                ->title(__('filament-ai-translate::ai-translate.notifications.translation_completed_count', [
+                ->title(__('filament-ai-autofill::ai-autofill.notifications.translation_completed_count', [
                     'count' => $translatedCount,
                 ]))
                 ->success()
                 ->send();
 
         } catch (Exception $e) {
-            Log::error('FilamentAiTranslate batch: ' . $e->getMessage());
+            Log::error('FilamentAiAutofill batch: ' . $e->getMessage());
 
             Notification::make()
-                ->title(__('filament-ai-translate::ai-translate.notifications.translation_failed'))
+                ->title(__('filament-ai-autofill::ai-autofill.notifications.translation_failed'))
                 ->danger()
                 ->send();
         }
@@ -296,7 +296,7 @@ class TranslateBatchAction extends Action
         // 3. Auto-map from source field names using naming strategy
         if (! empty($this->sourceFieldNames)) {
             $strategy = $this->fieldNaming
-                ?? FieldNamingStrategy::tryFrom(config('filament-ai-translate.field_naming', 'auto'))
+                ?? FieldNamingStrategy::tryFrom(config('filament-ai-autofill.field_naming', 'auto'))
                 ?? FieldNamingStrategy::AutoDetect;
 
             return FieldMapper::forFields($this->sourceFieldNames, $sourceLocale, $targetLocales, $strategy);
@@ -413,7 +413,7 @@ class TranslateBatchAction extends Action
     protected function resolveSourceLocale(): string
     {
         return $this->sourceLocale
-            ?? config('filament-ai-translate.source_locale', 'ar');
+            ?? config('filament-ai-autofill.source_locale', 'ar');
     }
 
     /**
@@ -422,13 +422,13 @@ class TranslateBatchAction extends Action
     protected function resolveTargetLocales(): array
     {
         return $this->targetLocales
-            ?? config('filament-ai-translate.target_locales', ['en']);
+            ?? config('filament-ai-autofill.target_locales', ['en']);
     }
 
     protected function resolveTranslator(): Translator
     {
         $class = $this->translatorClass
-            ?? config('filament-ai-translate.translator');
+            ?? config('filament-ai-autofill.translator');
 
         return app($class);
     }
@@ -436,6 +436,6 @@ class TranslateBatchAction extends Action
     protected function shouldConfirmOverwrite(): bool
     {
         return $this->confirmOverwrite
-            ?? config('filament-ai-translate.confirm_overwrite', true);
+            ?? config('filament-ai-autofill.confirm_overwrite', true);
     }
 }

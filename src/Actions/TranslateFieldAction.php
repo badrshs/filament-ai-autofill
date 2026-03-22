@@ -1,6 +1,6 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Actions;
+namespace Badrsh\FilamentAiAutofill\Actions;
 
 use Exception;
 use Filament\Actions\Action;
@@ -8,7 +8,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
-use Badrsh\FilamentAiTranslate\Contracts\Translator;
+use Badrsh\FilamentAiAutofill\Contracts\Translator;
 
 /**
  * Inline suffix action for a single field.
@@ -47,7 +47,7 @@ class TranslateFieldAction extends Action
         $this
             ->icon('heroicon-m-sparkles')
             ->color('primary')
-            ->tooltip(fn(): string => __('filament-ai-translate::ai-translate.actions.translate'))
+            ->tooltip(fn(): string => __('filament-ai-autofill::ai-autofill.actions.translate'))
             ->action(function (Get $get, Set $set): void {
                 $this->handleTranslation($get, $set);
             });
@@ -122,7 +122,7 @@ class TranslateFieldAction extends Action
 
             if (! filled($sourceValue) || ! is_string($sourceValue)) {
                 Notification::make()
-                    ->title(__('filament-ai-translate::ai-translate.notifications.empty_source'))
+                    ->title(__('filament-ai-autofill::ai-autofill.notifications.empty_source'))
                     ->warning()
                     ->send();
 
@@ -160,7 +160,7 @@ class TranslateFieldAction extends Action
             }
 
             Notification::make()
-                ->title(__('filament-ai-translate::ai-translate.notifications.translating'))
+                ->title(__('filament-ai-autofill::ai-autofill.notifications.translating'))
                 ->info()
                 ->send();
 
@@ -184,15 +184,15 @@ class TranslateFieldAction extends Action
             }
 
             Notification::make()
-                ->title(__('filament-ai-translate::ai-translate.notifications.translation_completed'))
+                ->title(__('filament-ai-autofill::ai-autofill.notifications.translation_completed'))
                 ->success()
                 ->send();
 
         } catch (Exception $e) {
-            Log::error('FilamentAiTranslate: ' . $e->getMessage());
+            Log::error('FilamentAiAutofill: ' . $e->getMessage());
 
             Notification::make()
-                ->title(__('filament-ai-translate::ai-translate.notifications.translation_failed'))
+                ->title(__('filament-ai-autofill::ai-autofill.notifications.translation_failed'))
                 ->danger()
                 ->send();
         }
@@ -215,7 +215,7 @@ class TranslateFieldAction extends Action
     protected function resolveSourceLocale(): string
     {
         return $this->sourceLocale
-            ?? config('filament-ai-translate.source_locale', 'ar');
+            ?? config('filament-ai-autofill.source_locale', 'ar');
     }
 
     /**
@@ -224,7 +224,7 @@ class TranslateFieldAction extends Action
     protected function resolveTargetLocales(): array
     {
         return $this->targetLocales
-            ?? config('filament-ai-translate.target_locales', ['en']);
+            ?? config('filament-ai-autofill.target_locales', ['en']);
     }
 
     /**
@@ -262,7 +262,7 @@ class TranslateFieldAction extends Action
     protected function resolveTranslator(): Translator
     {
         $class = $this->translatorClass
-            ?? config('filament-ai-translate.translator');
+            ?? config('filament-ai-autofill.translator');
 
         return app($class);
     }
@@ -270,6 +270,6 @@ class TranslateFieldAction extends Action
     protected function shouldConfirmOverwrite(): bool
     {
         return $this->confirmOverwrite
-            ?? config('filament-ai-translate.confirm_overwrite', true);
+            ?? config('filament-ai-autofill.confirm_overwrite', true);
     }
 }

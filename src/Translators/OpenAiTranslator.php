@@ -1,10 +1,10 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Translators;
+namespace Badrsh\FilamentAiAutofill\Translators;
 
 use Exception;
 use Illuminate\Support\Facades\Http;
-use Badrsh\FilamentAiTranslate\Contracts\Translator;
+use Badrsh\FilamentAiAutofill\Contracts\Translator;
 
 class OpenAiTranslator implements Translator
 {
@@ -16,9 +16,9 @@ class OpenAiTranslator implements Translator
 
     public function __construct()
     {
-        $this->apiKey = config('filament-ai-translate.openai.key', config('services.openai.key', ''));
-        $this->model = config('filament-ai-translate.openai.model', 'gpt-4o-mini');
-        $this->baseUrl = config('filament-ai-translate.openai.base_url', 'https://api.openai.com/v1');
+        $this->apiKey = config('filament-ai-autofill.openai.key', config('services.openai.key', ''));
+        $this->model = config('filament-ai-autofill.openai.model', 'gpt-4o-mini');
+        $this->baseUrl = config('filament-ai-autofill.openai.base_url', 'https://api.openai.com/v1');
     }
 
     /**
@@ -33,7 +33,7 @@ class OpenAiTranslator implements Translator
         }
 
         if (empty($this->apiKey)) {
-            throw new Exception('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file or configure filament-ai-translate.openai.key.');
+            throw new Exception('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file or configure filament-ai-autofill.openai.key.');
         }
 
         return $this->callApi($values, $sourceLocale, $targetLocales);

@@ -1,4 +1,4 @@
-# Filament AI Translate
+# Filament AI Autofill
 
 AI-powered auto-translation for [Filament](https://filamentphp.com) form fields. Click a button, and your content is translated from one language to many — using OpenAI or any custom AI translator.
 
@@ -30,13 +30,13 @@ All translations happen via OpenAI by default. You can plug in DeepL, Google Tra
 ### Step 1: Install the package
 
 ```bash
-composer require badrsh/filament-ai-translate
+composer require badrsh/filament-ai-autofill
 ```
 
 ### Step 2: Publish the config
 
 ```bash
-php artisan vendor:publish --tag="filament-ai-translate-config"
+php artisan vendor:publish --tag="filament-ai-autofill-config"
 ```
 
 ### Step 3: Add your OpenAI key to `.env`
@@ -59,13 +59,13 @@ That's it. The package works out of the box with any Filament form.
 If you want to override source/target locales at the panel level (instead of config):
 
 ```php
-use Badrsh\FilamentAiTranslate\FilamentAiTranslatePlugin;
+use Badrsh\FilamentAiAutofill\FilamentAiAutofillPlugin;
 
 public function panel(Panel $panel): Panel
 {
     return $panel
         ->plugins([
-            FilamentAiTranslatePlugin::make()
+            FilamentAiAutofillPlugin::make()
                 ->sourceLocale('ar')
                 ->targetLocales(['en', 'fr']),
         ]);
@@ -83,7 +83,7 @@ There are **3 ways** to use this package. Pick whichever fits your form layout.
 Creates tabs (AR, EN, FR...) with an auto-translate button on the source tab.
 
 ```php
-use Badrsh\FilamentAiTranslate\Concerns\HasTranslatableFields;
+use Badrsh\FilamentAiAutofill\Concerns\HasTranslatableFields;
 
 class PostResource extends Resource
 {
@@ -129,7 +129,7 @@ static::translatableTabs(
 Add a sparkle icon (✨) to any individual field. When clicked, it translates that single field.
 
 ```php
-use Badrsh\FilamentAiTranslate\Actions\TranslateFieldAction;
+use Badrsh\FilamentAiAutofill\Actions\TranslateFieldAction;
 
 Forms\Components\TextInput::make('title')
     ->suffixAction(
@@ -158,7 +158,7 @@ TranslateFieldAction::make()
 Place a standalone "translate all" button anywhere in your form.
 
 ```php
-use Badrsh\FilamentAiTranslate\Actions\TranslateBatchAction;
+use Badrsh\FilamentAiAutofill\Actions\TranslateBatchAction;
 
 Forms\Components\Actions::make([
     TranslateBatchAction::make()
@@ -192,12 +192,12 @@ TranslateBatchAction::make()
 
 ## Configuration
 
-After publishing, edit `config/filament-ai-translate.php`:
+After publishing, edit `config/filament-ai-autofill.php`:
 
 ```php
 return [
-    // The translator class (must implement Badrsh\FilamentAiTranslate\Contracts\Translator)
-    'translator' => \Badrsh\FilamentAiTranslate\Translators\OpenAiTranslator::class,
+    // The translator class (must implement Badrsh\FilamentAiAutofill\Contracts\Translator)
+    'translator' => \Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class,
 
     // The language your content is written in
     'source_locale' => 'ar',
@@ -253,7 +253,7 @@ Set it in your config:
 Don't want OpenAI? Implement the `Translator` interface:
 
 ```php
-use Badrsh\FilamentAiTranslate\Contracts\Translator;
+use Badrsh\FilamentAiAutofill\Contracts\Translator;
 
 class DeepLTranslator implements Translator
 {
@@ -299,7 +299,7 @@ TranslateBatchAction::make()
 For testing without API calls, use the built-in `NullTranslator`:
 
 ```php
-config(['filament-ai-translate.translator' => \Badrsh\FilamentAiTranslate\Translators\NullTranslator::class]);
+config(['filament-ai-autofill.translator' => \Badrsh\FilamentAiAutofill\Translators\NullTranslator::class]);
 ```
 
 ---
@@ -309,7 +309,7 @@ config(['filament-ai-translate.translator' => \Badrsh\FilamentAiTranslate\Transl
 The package ships with English and Arabic UI strings (button labels, notifications). To customize:
 
 ```bash
-php artisan vendor:publish --tag="filament-ai-translate-translations"
+php artisan vendor:publish --tag="filament-ai-autofill-translations"
 ```
 
 ---

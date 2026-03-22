@@ -1,13 +1,13 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Concerns;
+namespace Badrsh\FilamentAiAutofill\Concerns;
 
 use Closure;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Badrsh\FilamentAiTranslate\Actions\TranslateBatchAction;
-use Badrsh\FilamentAiTranslate\Actions\TranslateFieldAction;
+use Badrsh\FilamentAiAutofill\Actions\TranslateBatchAction;
+use Badrsh\FilamentAiAutofill\Actions\TranslateFieldAction;
 
 /**
  * Convenience trait for building translatable tabbed forms with
@@ -56,12 +56,12 @@ trait HasTranslatableFields
         ?array $targetLocales = null,
         ?array $locales = null,
     ): Tabs {
-        $sourceLocale = $sourceLocale ?? config('filament-ai-translate.source_locale', 'ar');
-        $targetLocales = $targetLocales ?? config('filament-ai-translate.target_locales', ['en']);
+        $sourceLocale = $sourceLocale ?? config('filament-ai-autofill.source_locale', 'ar');
+        $targetLocales = $targetLocales ?? config('filament-ai-autofill.target_locales', ['en']);
         $locales = $locales ?? array_unique(array_merge([$sourceLocale], $targetLocales));
-        $label = $label ?: __('filament-ai-translate::ai-translate.tabs.label');
+        $label = $label ?: __('filament-ai-autofill::ai-autofill.tabs.label');
 
-        $fieldNaming = config('filament-ai-translate.field_naming', 'auto');
+        $fieldNaming = config('filament-ai-autofill.field_naming', 'auto');
 
         return Tabs::make($label)
             ->tabs(

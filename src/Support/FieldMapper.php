@@ -1,8 +1,8 @@
 <?php
 
-namespace Badrsh\FilamentAiTranslate\Support;
+namespace Badrsh\FilamentAiAutofill\Support;
 
-use Badrsh\FilamentAiTranslate\Enums\FieldNamingStrategy;
+use Badrsh\FilamentAiAutofill\Enums\FieldNamingStrategy;
 
 class FieldMapper
 {

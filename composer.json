@@ -1,9 +1,10 @@
 {
-    "name": "badrsh/filament-ai-translate",
-    "description": "AI-powered field translation for Filament forms. Auto-populate translations using OpenAI, DeepL, or any custom AI translator.",
+    "name": "badrsh/filament-ai-autofill",
+    "description": "AI-powered autofill and translation for Filament form fields. Auto-populate translations using OpenAI, DeepL, or any custom AI translator.",
     "keywords": [
         "laravel",
         "filament",
+        "autofill",
         "translate",
         "translation",
         "ai",
@@ -12,7 +13,7 @@
         "i18n",
         "filament-plugin"
     ],
-    "homepage": "https://github.com/badrsh/filament-ai-translate",
+    "homepage": "https://github.com/badrsh/filament-ai-autofill",
     "license": "MIT",
     "authors": [
         {
@@ -37,18 +38,18 @@
             "src/Support/FilamentCompat.php"
         ],
         "psr-4": {
-            "Badrsh\\FilamentAiTranslate\\": "src/"
+            "Badrsh\\FilamentAiAutofill\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Badrsh\\FilamentAiTranslate\\Tests\\": "tests/"
+            "Badrsh\\FilamentAiAutofill\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Badrsh\\FilamentAiTranslate\\FilamentAiTranslateServiceProvider"
+                "Badrsh\\FilamentAiAutofill\\FilamentAiAutofillServiceProvider"
             ]
         }
     },

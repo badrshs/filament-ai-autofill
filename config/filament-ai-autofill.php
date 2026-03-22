@@ -8,15 +8,15 @@ return [
     |--------------------------------------------------------------------------
     |
     | The class responsible for performing translations. Must implement
-    | Badrsh\FilamentAiTranslate\Contracts\Translator.
+    | Badrsh\FilamentAiAutofill\Contracts\Translator.
     |
     | Built-in options:
-    | - Badrsh\FilamentAiTranslate\Translators\OpenAiTranslator::class
-    | - Badrsh\FilamentAiTranslate\Translators\NullTranslator::class
+    | - Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class
+    | - Badrsh\FilamentAiAutofill\Translators\NullTranslator::class
     |
     */
 
-    'translator' => Badrsh\FilamentAiTranslate\Translators\OpenAiTranslator::class,
+    'translator' => Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class,
 
     /*
     |--------------------------------------------------------------------------
