@@ -23,6 +23,12 @@ class FilamentAiAutofillServiceProvider extends PackageServiceProvider
         $this->app->bind(Translator::class, function ($app) {
             $class = config('filament-ai-autofill.translator');
 
+            // Auto-fallback: if LaravelAiTranslator is configured but laravel/ai
+            // is not installed, fall back to OpenAiTranslator automatically.
+            if ($class === Translators\LaravelAiTranslator::class && ! function_exists('Laravel\Ai\agent')) {
+                $class = Translators\OpenAiTranslator::class;
+            }
+
             return $app->make($class);
         });
     }

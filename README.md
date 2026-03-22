@@ -16,7 +16,7 @@ You have a Filament form with fields in Arabic (or any source language). You wan
 3. **A tab helper** — builds AR / EN / FR tabs with translation built in
 4. **Smart auto-detection** — automatically picks sparkle or batch mode based on field count
 
-All translations happen via the Laravel AI SDK by default (supports OpenAI, Anthropic, Gemini, and more). You can also use the built-in direct OpenAI translator, or plug in DeepL, Google Translate, or any custom translator.
+All translations happen via the Laravel AI SDK when available (supports OpenAI, Anthropic, Gemini, and more). If `laravel/ai` is not installed or your environment doesn't meet its requirements (PHP 8.3+, Laravel 12+), the package automatically falls back to the built-in OpenAI translator. No configuration needed — it just works.
 
 ## Requirements
 
@@ -40,31 +40,15 @@ composer require badrsh/filament-ai-autofill
 php artisan vendor:publish --tag="filament-ai-autofill-config"
 ```
 
-### Step 3: Configure your AI provider
-
-**Option A: Laravel AI SDK (default, recommended)**
-
-Install the Laravel AI package and configure it:
-
-```bash
-composer require laravel/ai
-```
-
-Then follow the [Laravel AI docs](https://laravel.com/docs/ai) to set up your preferred provider (OpenAI, Anthropic, Gemini, etc.) in `config/ai.php`.
-
-**Option B: Direct OpenAI**
-
-If you prefer direct OpenAI calls without the Laravel AI SDK, change the translator in `config/filament-ai-autofill.php`:
-
-```php
-'translator' => \Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class,
-```
-
-Then add your OpenAI key to `.env`:
+### Step 3: Add your OpenAI key to `.env`
 
 ```env
 OPENAI_API_KEY=sk-your-key-here
 ```
+
+That's it. The package works out of the box. It will automatically use the Laravel AI SDK if your environment supports it (PHP 8.3+, Laravel 12+), or fall back to the built-in OpenAI translator otherwise.
+
+> **Tip:** To enable multi-provider support (Anthropic, Gemini, etc.), just run `composer require laravel/ai`. The package will detect it and switch automatically.
 
 That's it. The package works out of the box with any Filament form.
 
@@ -219,7 +203,7 @@ After publishing, edit `config/filament-ai-autofill.php`:
 ```php
 return [
     // The translator class (must implement Badrsh\FilamentAiAutofill\Contracts\Translator)
-    // Default: LaravelAiTranslator (requires laravel/ai). Use OpenAiTranslator for direct OpenAI calls.
+    // Default: LaravelAiTranslator (auto-falls back to OpenAiTranslator if laravel/ai is not installed)
     'translator' => \Badrsh\FilamentAiAutofill\Translators\LaravelAiTranslator::class,
 
     // The language your content is written in
@@ -253,7 +237,7 @@ return [
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENAI_API_KEY` | *(required for OpenAiTranslator)* | Your OpenAI API key |
+| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |
 | `OPENAI_MODEL` | `gpt-4o-mini` | The model to use for translations |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | API base URL (change for proxies or compatible APIs) |
 | `OPENAI_TIMEOUT` | `60` | HTTP timeout in seconds per request. Increase if you hit timeouts on large texts |

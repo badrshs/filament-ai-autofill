@@ -3,6 +3,7 @@
 use Badrsh\FilamentAiAutofill\Contracts\Translator;
 use Badrsh\FilamentAiAutofill\Translators\NullTranslator;
 use Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator;
+use Badrsh\FilamentAiAutofill\Translators\LaravelAiTranslator;
 use Badrsh\FilamentAiAutofill\Tests\Fixtures\FakeTranslator;
 
 test('service provider registers config', function () {
@@ -66,4 +67,18 @@ test('translations are loaded for arabic', function () {
     expect(__('filament-ai-autofill::ai-autofill.actions.translate'))->toBe('ترجمة');
     expect(__('filament-ai-autofill::ai-autofill.actions.translate_all'))->toBe('ترجمة تلقائية للكل');
     expect(__('filament-ai-autofill::ai-autofill.tabs.label'))->toBe('الترجمات');
+});
+
+test('auto-fallback: LaravelAiTranslator falls back to OpenAiTranslator when laravel/ai is not installed', function () {
+    // Set config to LaravelAiTranslator (the default) and provide a dummy API key
+    config([
+        'filament-ai-autofill.translator' => LaravelAiTranslator::class,
+        'filament-ai-autofill.openai.key' => 'sk-test-dummy-key',
+    ]);
+
+    // laravel/ai is not installed in test environment, so the function_exists check
+    // should trigger the fallback to OpenAiTranslator
+    $translator = app(Translator::class);
+
+    expect($translator)->toBeInstanceOf(OpenAiTranslator::class);
 });
