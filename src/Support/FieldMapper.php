@@ -1,8 +1,8 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Support;
+namespace Badrsh\FilamentAiTranslate\Support;
 
-use Molham\FilamentTranslateField\Enums\FieldNamingStrategy;
+use Badrsh\FilamentAiTranslate\Enums\FieldNamingStrategy;
 
 class FieldMapper
 {

@@ -1,68 +1,91 @@
-# Filament Translate Field
+# Filament AI Translate
 
-AI-powered field translation for [Filament](https://filamentphp.com) forms. Translate content between languages using OpenAI, DeepL, or any custom translator.
+AI-powered auto-translation for [Filament](https://filamentphp.com) form fields. Click a button, and your content is translated from one language to many — using OpenAI or any custom AI translator.
 
-![Filament v3](https://img.shields.io/badge/Filament-v3-blue)
+![Filament v3/v4/v5](https://img.shields.io/badge/Filament-v3%20%7C%20v4%20%7C%20v5-blue)
 ![Laravel](https://img.shields.io/badge/Laravel-10%2F11%2F12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## Features
+## What It Does
 
-- **Per-field inline action** — sparkle icon on any field to translate just that field
-- **Batch action** — single button translates all source fields at once (one API call)
-- **Translatable tabs helper** — build multi-locale tabbed forms with one method
-- **Flexible field mapping** — supports suffix (`title_en`), dot notation (`title.en`), and auto-detection
-- **Extensible translators** — ships with OpenAI, easily plug in DeepL or custom drivers
-- **Overwrite protection** — optional confirmation before overwriting existing translations
-- **Zero coupling** — works with any Filament form, any resource, any model
+You have a Filament form with fields in Arabic (or any source language). You want the English (or other) fields filled in automatically. This package adds:
+
+1. **A sparkle ✨ icon** on individual fields — click it to translate that one field
+2. **An "Auto-translate All" button** — translates every source field in one API call
+3. **A tab helper** — builds AR / EN / FR tabs with translation built in
+
+All translations happen via OpenAI by default. You can plug in DeepL, Google Translate, or any custom translator.
+
+## Requirements
+
+| Dependency | Versions |
+|------------|----------|
+| PHP | 8.1+ |
+| Laravel | 10, 11, 12 |
+| Filament | 3.x, 4.x, 5.x |
 
 ## Installation
 
-```bash
-composer require molham/filament-translate-field
-```
-
-Publish the config file:
+### Step 1: Install the package
 
 ```bash
-php artisan vendor:publish --tag="filament-translate-field-config"
+composer require badrsh/filament-ai-translate
 ```
 
-Set your OpenAI API key in `.env`:
+### Step 2: Publish the config
+
+```bash
+php artisan vendor:publish --tag="filament-ai-translate-config"
+```
+
+### Step 3: Add your OpenAI key to `.env`
 
 ```env
 OPENAI_API_KEY=sk-your-key-here
 ```
 
-### Optional: Register the Plugin
+You can also customize the model and base URL via environment variables:
 
-Add the plugin to your Filament panel for panel-level configuration:
+```env
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+That's it. The package works out of the box with any Filament form.
+
+### Optional: Panel Plugin
+
+If you want to override source/target locales at the panel level (instead of config):
 
 ```php
-use Molham\FilamentTranslateField\FilamentTranslateFieldPlugin;
+use Badrsh\FilamentAiTranslate\FilamentAiTranslatePlugin;
 
 public function panel(Panel $panel): Panel
 {
     return $panel
         ->plugins([
-            FilamentTranslateFieldPlugin::make()
+            FilamentAiTranslatePlugin::make()
                 ->sourceLocale('ar')
                 ->targetLocales(['en', 'fr']),
         ]);
 }
 ```
 
-## Quick Start
+---
 
-### Option 1: Translatable Tabs (Recommended)
+## Usage
 
-The fastest way to add translation to any resource:
+There are **3 ways** to use this package. Pick whichever fits your form layout.
+
+### Approach 1: Translatable Tabs (Recommended)
+
+Creates tabs (AR, EN, FR...) with an auto-translate button on the source tab.
 
 ```php
-use Molham\FilamentTranslateField\Concerns\HasTranslatableFields;
+use Badrsh\FilamentAiTranslate\Concerns\HasTranslatableFields;
 
-class CampaignResource extends Resource
+class PostResource extends Resource
 {
     use HasTranslatableFields;
 
@@ -74,7 +97,7 @@ class CampaignResource extends Resource
                     Forms\Components\TextInput::make("title{$suffix}")
                         ->required($locale === 'ar'),
                     Forms\Components\Textarea::make("description{$suffix}"),
-                    Forms\Components\RichEditor::make("details{$suffix}"),
+                    Forms\Components\RichEditor::make("body{$suffix}"),
                 ],
             ),
         ]);
@@ -82,14 +105,31 @@ class CampaignResource extends Resource
 }
 ```
 
-This creates tabs (AR, EN, etc.) with a **"Auto-translate All"** button on the source tab.
+**What happens:**
+- An **AR** tab appears with your source fields + an "Auto-translate All" button
+- An **EN** tab (and others) with the same fields suffixed for that locale
+- Clicking the button translates all filled AR fields → EN in a single API call
 
-### Option 2: Inline Per-Field Action
-
-Add a sparkle icon to any individual field:
+**Options you can pass:**
 
 ```php
-use Molham\FilamentTranslateField\Actions\TranslateFieldAction;
+static::translatableTabs(
+    schemaCallback: fn (string $locale, string $suffix) => [...],
+    label: 'Translations',       // Tab group label
+    withBatchAction: true,       // Show the "Auto-translate All" button
+    withFieldActions: false,     // Show sparkle icon on each source field
+    sourceLocale: 'ar',          // Override source locale
+    targetLocales: ['en', 'fr'], // Override target locales
+    locales: ['ar', 'en', 'fr'], // Override full locale list
+);
+```
+
+### Approach 2: Inline Per-Field Action
+
+Add a sparkle icon (✨) to any individual field. When clicked, it translates that single field.
+
+```php
+use Badrsh\FilamentAiTranslate\Actions\TranslateFieldAction;
 
 Forms\Components\TextInput::make('title')
     ->suffixAction(
@@ -98,74 +138,137 @@ Forms\Components\TextInput::make('title')
     ),
 ```
 
-### Option 3: Batch Action Button
+**What happens:**
+- A sparkle icon appears on the right side of the `title` field
+- Clicking it sends the Arabic text to OpenAI and fills `title_en` and `title_fr`
 
-Place a translate-all button anywhere in your form:
+**Options:**
 
 ```php
-use Molham\FilamentTranslateField\Actions\TranslateBatchAction;
+TranslateFieldAction::make()
+    ->targetFields(['en' => 'title_en'])  // Required: where to put translations
+    ->sourceLocale('ar')                   // Override source locale
+    ->targetLocales(['en', 'fr'])          // Override target locales
+    ->translator(MyTranslator::class)      // Use a custom translator
+    ->confirmOverwrite(false)              // Don't warn before overwriting
+```
+
+### Approach 3: Batch Action Button
+
+Place a standalone "translate all" button anywhere in your form.
+
+```php
+use Badrsh\FilamentAiTranslate\Actions\TranslateBatchAction;
 
 Forms\Components\Actions::make([
     TranslateBatchAction::make()
         ->sourceFields(['title', 'description'])
         ->targetMapping([
-            'title' => ['en' => 'title_en'],
+            'title'       => ['en' => 'title_en'],
             'description' => ['en' => 'description_en'],
         ]),
 ]),
 ```
 
-## Configuration
+**What happens:**
+- A button appears in your form
+- Clicking it collects all source field values, makes **one** API call, and distributes the translations
+
+**Options:**
 
 ```php
-// config/filament-translate-field.php
+TranslateBatchAction::make()
+    ->sourceFields(['title', 'description'])           // Which fields to translate
+    ->targetMapping(['title' => ['en' => 'title_en']]) // Explicit field mapping
+    ->schemaCallback(fn ($locale, $suffix) => [...])   // Auto-discover from schema
+    ->sourceLocale('ar')                                // Override source locale
+    ->targetLocales(['en'])                             // Override target locales
+    ->translator(MyTranslator::class)                   // Use a custom translator
+    ->fieldNaming('suffix')                             // Override naming strategy
+    ->confirmOverwrite(false)                           // Don't warn before overwriting
+```
 
+---
+
+## Configuration
+
+After publishing, edit `config/filament-ai-translate.php`:
+
+```php
 return [
-    // The translator driver class
-    'translator' => \Molham\FilamentTranslateField\Translators\OpenAiTranslator::class,
+    // The translator class (must implement Badrsh\FilamentAiTranslate\Contracts\Translator)
+    'translator' => \Badrsh\FilamentAiTranslate\Translators\OpenAiTranslator::class,
 
-    // Default source language
+    // The language your content is written in
     'source_locale' => 'ar',
 
-    // Default target languages
+    // The languages to translate into
     'target_locales' => ['en'],
 
-    // Field naming: 'suffix', 'dot', or 'auto'
-    'field_naming' => 'auto',
+    // How your form fields are named (see "Field Naming" below)
+    'field_naming' => 'auto',    // 'suffix', 'dot', or 'auto'
 
-    // Show confirmation before overwriting non-empty fields
+    // Ask before overwriting fields that already have content
     'confirm_overwrite' => true,
 
-    // OpenAI settings
+    // OpenAI settings (all configurable via .env)
     'openai' => [
-        'key' => env('OPENAI_API_KEY'),
-        'model' => 'gpt-4o-mini',
-        'base_url' => 'https://api.openai.com/v1',
+        'key'      => env('OPENAI_API_KEY'),
+        'model'    => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
     ],
 ];
 ```
 
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |
+| `OPENAI_MODEL` | `gpt-4o-mini` | The model to use for translations |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | API base URL (change for proxies or compatible APIs) |
+
+---
+
 ## Field Naming Strategies
 
-| Strategy | Source Field | Target Field (en) | Target Field (fr) |
-|----------|------------|-------------------|-------------------|
-| `suffix` | `title` | `title_en` | `title_fr` |
-| `dot` | `title.ar` | `title.en` | `title.fr` |
-| `auto` | Detects automatically based on your field names |
+The package needs to know how your source and target fields are named so it can map between them.
+
+| Strategy | Source Field | Target Field (en) | Target Field (fr) | When to use |
+|----------|-------------|-------------------|-------------------|-------------|
+| `suffix` | `title` | `title_en` | `title_fr` | Flat column per locale |
+| `dot` | `title.ar` | `title.en` | `title.fr` | JSON/translatable columns |
+| `auto` | *(detects)* | *(detects)* | *(detects)* | Let the package figure it out |
+
+Set it in your config:
+
+```php
+'field_naming' => 'suffix', // or 'dot' or 'auto'
+```
+
+---
 
 ## Custom Translators
 
-Implement the `Translator` contract:
+Don't want OpenAI? Implement the `Translator` interface:
 
 ```php
-use Molham\FilamentTranslateField\Contracts\Translator;
+use Badrsh\FilamentAiTranslate\Contracts\Translator;
 
 class DeepLTranslator implements Translator
 {
     public function translate(array $values, string $sourceLocale, array $targetLocales): array
     {
-        // $values = ['title' => 'مرحبا', 'description' => 'نص طويل']
-        // Return: ['title' => ['en' => 'Hello'], 'description' => ['en' => 'Long text']]
+        // Input:
+        //   $values = ['title' => 'مرحبا', 'description' => 'نص طويل']
+        //   $sourceLocale = 'ar'
+        //   $targetLocales = ['en', 'fr']
+        //
+        // Expected output:
+        //   [
+        //       'title'       => ['en' => 'Hello', 'fr' => 'Bonjour'],
+        //       'description' => ['en' => 'Long text', 'fr' => 'Texte long'],
+        //   ]
 
         $results = [];
 
@@ -180,7 +283,7 @@ class DeepLTranslator implements Translator
 }
 ```
 
-Register it in your config:
+Then set it in your config:
 
 ```php
 'translator' => \App\Translators\DeepLTranslator::class,
@@ -193,92 +296,27 @@ TranslateBatchAction::make()
     ->translator(\App\Translators\DeepLTranslator::class)
 ```
 
-## API Reference
-
-### TranslateFieldAction
-
-Inline suffix action for a single field.
+For testing without API calls, use the built-in `NullTranslator`:
 
 ```php
-TranslateFieldAction::make()
-    ->targetFields(['en' => 'title_en'])  // Required: target field mapping
-    ->sourceLocale('ar')                   // Override source locale
-    ->targetLocales(['en', 'fr'])          // Override target locales
-    ->translator(MyTranslator::class)      // Override translator
-    ->confirmOverwrite(false)              // Skip overwrite confirmation
+config(['filament-ai-translate.translator' => \Badrsh\FilamentAiTranslate\Translators\NullTranslator::class]);
 ```
 
-### TranslateBatchAction
+---
 
-Batch action for translating multiple fields at once.
+## Customizing Translations (UI Strings)
 
-```php
-TranslateBatchAction::make()
-    ->sourceFields(['title', 'description'])           // Explicit source fields
-    ->targetMapping(['title' => ['en' => 'title_en']]) // Explicit mapping
-    ->schemaCallback(fn ($locale, $suffix) => [...])   // Auto-discover from schema
-    ->sourceLocale('ar')                                // Override source locale
-    ->targetLocales(['en'])                             // Override target locales
-    ->translator(MyTranslator::class)                   // Override translator
-    ->fieldNaming('suffix')                             // Override naming strategy
-    ->confirmOverwrite(false)                           // Skip overwrite confirmation
-```
-
-### HasTranslatableFields Trait
-
-```php
-static::translatableTabs(
-    schemaCallback: fn (string $locale, string $suffix) => [...],
-    label: 'Translations',          // Tab group label
-    withBatchAction: true,          // Add batch button to source tab
-    withFieldActions: false,        // Add inline icons to source fields
-    sourceLocale: 'ar',             // Override source locale
-    targetLocales: ['en', 'fr'],    // Override targets
-    locales: ['ar', 'en', 'fr'],    // Override full locale list
-)
-```
-
-### FieldMapper
-
-Utility for building field mappings programmatically:
-
-```php
-use Molham\FilamentTranslateField\Support\FieldMapper;
-use Molham\FilamentTranslateField\Enums\FieldNamingStrategy;
-
-$config = FieldMapper::forFields(
-    sourceFields: ['title', 'description'],
-    sourceLocale: 'ar',
-    targetLocales: ['en', 'fr'],
-    strategy: FieldNamingStrategy::Suffix,
-);
-
-// $config->fieldMap = [
-//     'title' => ['en' => 'title_en', 'fr' => 'title_fr'],
-//     'description' => ['en' => 'description_en', 'fr' => 'description_fr'],
-// ]
-```
-
-## Translations
-
-The package ships with English and Arabic translations. Publish to customize:
+The package ships with English and Arabic UI strings (button labels, notifications). To customize:
 
 ```bash
-php artisan vendor:publish --tag="filament-translate-field-translations"
+php artisan vendor:publish --tag="filament-ai-translate-translations"
 ```
 
-## Testing
+---
 
-```bash
-composer test
-```
+## Filament Version Compatibility
 
-For testing without API calls, use the `NullTranslator`:
-
-```php
-// In your test setup
-config(['filament-translate-field.translator' => NullTranslator::class]);
-```
+This package works with Filament v3, v4, and v5. It uses Filament v5 namespaces internally and includes an automatic compatibility layer (`FilamentCompat.php`) that aliases the older namespace classes on v3/v4. No extra configuration needed — install and go.
 
 ## License
 

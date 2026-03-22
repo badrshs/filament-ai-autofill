@@ -8,15 +8,15 @@ return [
     |--------------------------------------------------------------------------
     |
     | The class responsible for performing translations. Must implement
-    | Molham\FilamentTranslateField\Contracts\Translator.
+    | Badrsh\FilamentAiTranslate\Contracts\Translator.
     |
     | Built-in options:
-    | - Molham\FilamentTranslateField\Translators\OpenAiTranslator::class
-    | - Molham\FilamentTranslateField\Translators\NullTranslator::class
+    | - Badrsh\FilamentAiTranslate\Translators\OpenAiTranslator::class
+    | - Badrsh\FilamentAiTranslate\Translators\NullTranslator::class
     |
     */
 
-    'translator' => Molham\FilamentTranslateField\Translators\OpenAiTranslator::class,
+    'translator' => Badrsh\FilamentAiTranslate\Translators\OpenAiTranslator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -80,8 +80,8 @@ return [
 
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
-        'model' => 'gpt-4o-mini',
-        'base_url' => 'https://api.openai.com/v1',
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
     ],
 
 ];

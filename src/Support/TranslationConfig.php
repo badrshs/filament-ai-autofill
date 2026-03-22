@@ -1,6 +1,6 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Support;
+namespace Badrsh\FilamentAiTranslate\Support;
 
 /**
  * Immutable value object holding the translation field mapping configuration.

@@ -1,8 +1,8 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Translators;
+namespace Badrsh\FilamentAiTranslate\Translators;
 
-use Molham\FilamentTranslateField\Contracts\Translator;
+use Badrsh\FilamentAiTranslate\Contracts\Translator;
 
 /**
  * A no-op translator useful for testing and development.

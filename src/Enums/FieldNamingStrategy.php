@@ -1,6 +1,6 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Enums;
+namespace Badrsh\FilamentAiTranslate\Enums;
 
 enum FieldNamingStrategy: string
 {

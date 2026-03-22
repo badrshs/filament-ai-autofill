@@ -1,6 +1,6 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Contracts;
+namespace Badrsh\FilamentAiTranslate\Contracts;
 
 interface Translator
 {

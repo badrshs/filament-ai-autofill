@@ -1,6 +1,6 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Actions;
+namespace Badrsh\FilamentAiTranslate\Actions;
 
 use Exception;
 use Filament\Actions\Action;
@@ -8,7 +8,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
-use Molham\FilamentTranslateField\Contracts\Translator;
+use Badrsh\FilamentAiTranslate\Contracts\Translator;
 
 /**
  * Inline suffix action for a single field.
@@ -47,7 +47,7 @@ class TranslateFieldAction extends Action
         $this
             ->icon('heroicon-m-sparkles')
             ->color('primary')
-            ->tooltip(fn (): string => __('filament-translate-field::translate-field.actions.translate'))
+            ->tooltip(fn(): string => __('filament-ai-translate::ai-translate.actions.translate'))
             ->action(function (Get $get, Set $set): void {
                 $this->handleTranslation($get, $set);
             });
@@ -112,11 +112,17 @@ class TranslateFieldAction extends Action
     protected function handleTranslation(Get $get, Set $set): void
     {
         try {
-            $sourceValue = $get('../' . $this->getSourceFieldName());
+            $sourceFieldName = $this->getSourceFieldName();
+
+            if (empty($sourceFieldName)) {
+                return;
+            }
+
+            $sourceValue = $get('../' . $sourceFieldName);
 
             if (! filled($sourceValue) || ! is_string($sourceValue)) {
                 Notification::make()
-                    ->title(__('filament-translate-field::translate-field.notifications.empty_source'))
+                    ->title(__('filament-ai-translate::ai-translate.notifications.empty_source'))
                     ->warning()
                     ->send();
 
@@ -154,7 +160,7 @@ class TranslateFieldAction extends Action
             }
 
             Notification::make()
-                ->title(__('filament-translate-field::translate-field.notifications.translating'))
+                ->title(__('filament-ai-translate::ai-translate.notifications.translating'))
                 ->info()
                 ->send();
 
@@ -178,16 +184,15 @@ class TranslateFieldAction extends Action
             }
 
             Notification::make()
-                ->title(__('filament-translate-field::translate-field.notifications.translation_completed'))
+                ->title(__('filament-ai-translate::ai-translate.notifications.translation_completed'))
                 ->success()
                 ->send();
 
         } catch (Exception $e) {
-            Log::error('FilamentTranslateField: ' . $e->getMessage());
+            Log::error('FilamentAiTranslate: ' . $e->getMessage());
 
             Notification::make()
-                ->title(__('filament-translate-field::translate-field.notifications.translation_failed'))
-                ->body($e->getMessage())
+                ->title(__('filament-ai-translate::ai-translate.notifications.translation_failed'))
                 ->danger()
                 ->send();
         }
@@ -210,7 +215,7 @@ class TranslateFieldAction extends Action
     protected function resolveSourceLocale(): string
     {
         return $this->sourceLocale
-            ?? config('filament-translate-field.source_locale', 'ar');
+            ?? config('filament-ai-translate.source_locale', 'ar');
     }
 
     /**
@@ -219,7 +224,7 @@ class TranslateFieldAction extends Action
     protected function resolveTargetLocales(): array
     {
         return $this->targetLocales
-            ?? config('filament-translate-field.target_locales', ['en']);
+            ?? config('filament-ai-translate.target_locales', ['en']);
     }
 
     /**
@@ -257,7 +262,7 @@ class TranslateFieldAction extends Action
     protected function resolveTranslator(): Translator
     {
         $class = $this->translatorClass
-            ?? config('filament-translate-field.translator');
+            ?? config('filament-ai-translate.translator');
 
         return app($class);
     }
@@ -265,6 +270,6 @@ class TranslateFieldAction extends Action
     protected function shouldConfirmOverwrite(): bool
     {
         return $this->confirmOverwrite
-            ?? config('filament-translate-field.confirm_overwrite', true);
+            ?? config('filament-ai-translate.confirm_overwrite', true);
     }
 }

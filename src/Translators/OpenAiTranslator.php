@@ -1,10 +1,10 @@
 <?php
 
-namespace Molham\FilamentTranslateField\Translators;
+namespace Badrsh\FilamentAiTranslate\Translators;
 
 use Exception;
 use Illuminate\Support\Facades\Http;
-use Molham\FilamentTranslateField\Contracts\Translator;
+use Badrsh\FilamentAiTranslate\Contracts\Translator;
 
 class OpenAiTranslator implements Translator
 {
@@ -16,9 +16,9 @@ class OpenAiTranslator implements Translator
 
     public function __construct()
     {
-        $this->apiKey = config('filament-translate-field.openai.key', config('services.openai.key', ''));
-        $this->model = config('filament-translate-field.openai.model', 'gpt-4o-mini');
-        $this->baseUrl = config('filament-translate-field.openai.base_url', 'https://api.openai.com/v1');
+        $this->apiKey = config('filament-ai-translate.openai.key', config('services.openai.key', ''));
+        $this->model = config('filament-ai-translate.openai.model', 'gpt-4o-mini');
+        $this->baseUrl = config('filament-ai-translate.openai.base_url', 'https://api.openai.com/v1');
     }
 
     /**
@@ -33,7 +33,7 @@ class OpenAiTranslator implements Translator
         }
 
         if (empty($this->apiKey)) {
-            throw new Exception('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file or configure filament-translate-field.openai.key.');
+            throw new Exception('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file or configure filament-ai-translate.openai.key.');
         }
 
         return $this->callApi($values, $sourceLocale, $targetLocales);
