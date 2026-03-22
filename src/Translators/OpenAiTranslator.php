@@ -68,19 +68,28 @@ class OpenAiTranslator implements Translator
 
         $response = Http::withToken($this->apiKey)
             ->timeout(30)
-            ->post("{$this->baseUrl}/chat/completions", [
+            ->post("{$this->baseUrl}/responses", [
                 'model' => $this->model,
-                'messages' => [
+                'input' => [
                     [
                         'role' => 'system',
-                        'content' => 'You are an expert translator. Return only valid JSON. Never wrap in markdown code fences.',
+                        'content' => [
+                            [
+                                'type' => 'input_text',
+                                'text' => 'You are an expert translator. Return only valid JSON. Never wrap in markdown code fences.',
+                            ],
+                        ],
                     ],
                     [
                         'role' => 'user',
-                        'content' => $prompt,
+                        'content' => [
+                            [
+                                'type' => 'input_text',
+                                'text' => $prompt,
+                            ],
+                        ],
                     ],
                 ],
-                'temperature' => 0.3,
             ]);
 
         if ($response->failed()) {
@@ -94,7 +103,7 @@ class OpenAiTranslator implements Translator
             throw new Exception("OpenAI API error ({$status}): {$body}");
         }
 
-        $content = $response->json('choices.0.message.content');
+        $content = $response->json('output.0.content.0.text');
 
         if (! $content) {
             throw new Exception('Empty response from OpenAI.');

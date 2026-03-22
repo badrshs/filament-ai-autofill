@@ -4,9 +4,9 @@ namespace Molham\FilamentTranslateField\Actions;
 
 use Closure;
 use Exception;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Molham\FilamentTranslateField\Contracts\Translator;

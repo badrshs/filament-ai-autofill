@@ -3,9 +3,9 @@
 namespace Molham\FilamentTranslateField\Concerns;
 
 use Closure;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Molham\FilamentTranslateField\Actions\TranslateBatchAction;
 use Molham\FilamentTranslateField\Actions\TranslateFieldAction;
 
