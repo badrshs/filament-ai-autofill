@@ -14,11 +14,14 @@ class OpenAiTranslator implements Translator
 
     protected string $baseUrl;
 
+    protected int $timeout;
+
     public function __construct()
     {
         $this->apiKey = config('filament-ai-autofill.openai.key', config('services.openai.key', ''));
         $this->model = config('filament-ai-autofill.openai.model', 'gpt-4o-mini');
         $this->baseUrl = config('filament-ai-autofill.openai.base_url', 'https://api.openai.com/v1');
+        $this->timeout = (int) config('filament-ai-autofill.openai.timeout', 60);
     }
 
     /**
@@ -67,7 +70,7 @@ class OpenAiTranslator implements Translator
         PROMPT;
 
         $response = Http::withToken($this->apiKey)
-            ->timeout(30)
+            ->timeout($this->timeout)
             ->post("{$this->baseUrl}/responses", [
                 'model' => $this->model,
                 'input' => [

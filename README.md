@@ -227,6 +227,7 @@ return [
 | `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |
 | `OPENAI_MODEL` | `gpt-4o-mini` | The model to use for translations |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | API base URL (change for proxies or compatible APIs) |
+| `OPENAI_TIMEOUT` | `60` | HTTP timeout in seconds per request. Increase if you hit timeouts on large texts |
 
 ---
 

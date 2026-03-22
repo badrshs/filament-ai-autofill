@@ -79,9 +79,15 @@ return [
     */
 
     'openai' => [
-        'key' => env('OPENAI_API_KEY'),
-        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'key'      => env('OPENAI_API_KEY'),
+        'model'    => env('OPENAI_MODEL', 'gpt-4o-mini'),
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+
+        /*
+         | HTTP timeout in seconds for each OpenAI request.
+         | Increase this if you are translating large bodies of text.
+         */
+        'timeout' => env('OPENAI_TIMEOUT', 60),
     ],
 
 ];
