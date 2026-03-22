@@ -1,0 +1,128 @@
+<?php
+
+namespace Molham\FilamentTranslateField\Translators;
+
+use Exception;
+use Illuminate\Support\Facades\Http;
+use Molham\FilamentTranslateField\Contracts\Translator;
+
+class OpenAiTranslator implements Translator
+{
+    protected string $apiKey;
+
+    protected string $model;
+
+    protected string $baseUrl;
+
+    public function __construct()
+    {
+        $this->apiKey = config('filament-translate-field.openai.key', config('services.openai.key', ''));
+        $this->model = config('filament-translate-field.openai.model', 'gpt-4o-mini');
+        $this->baseUrl = config('filament-translate-field.openai.base_url', 'https://api.openai.com/v1');
+    }
+
+    /**
+     * @param  array<string, string>  $values
+     * @param  array<int, string>  $targetLocales
+     * @return array<string, array<string, string>>
+     */
+    public function translate(array $values, string $sourceLocale, array $targetLocales): array
+    {
+        if (empty($values) || empty($targetLocales)) {
+            return [];
+        }
+
+        if (empty($this->apiKey)) {
+            throw new Exception('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file or configure filament-translate-field.openai.key.');
+        }
+
+        return $this->callApi($values, $sourceLocale, $targetLocales);
+    }
+
+    protected function callApi(array $values, string $sourceLocale, array $targetLocales): array
+    {
+        $targetList = implode(', ', $targetLocales);
+        $inputJson = json_encode($values, JSON_UNESCAPED_UNICODE);
+
+        $prompt = <<<PROMPT
+        You are a professional translator. Translate the following JSON object from '{$sourceLocale}' to: {$targetList}.
+
+        TRANSLATION PRINCIPLES:
+        - Translate for MEANING and NATURAL EXPRESSION, not word-by-word
+        - Each translation should sound like a native speaker wrote it
+        - Preserve emotional tone and intent
+        - Cultural idioms should become natural equivalents in the target language
+        - Rephrase awkward literal translations naturally
+        - Preserve any HTML tags exactly as-is (do not translate tag names or attributes)
+
+        Input JSON:
+        {$inputJson}
+
+        Output ONLY valid JSON in this exact format — no markdown, no explanation:
+        {
+          "field_name": {
+            "locale_code": "translated text"
+          }
+        }
+        PROMPT;
+
+        $response = Http::withToken($this->apiKey)
+            ->timeout(30)
+            ->post("{$this->baseUrl}/chat/completions", [
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are an expert translator. Return only valid JSON. Never wrap in markdown code fences.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt,
+                    ],
+                ],
+                'temperature' => 0.3,
+            ]);
+
+        if ($response->failed()) {
+            $status = $response->status();
+            $body = $response->body();
+
+            if ($status === 429) {
+                throw new Exception('Translation rate limit exceeded. Please wait a moment and try again.');
+            }
+
+            throw new Exception("OpenAI API error ({$status}): {$body}");
+        }
+
+        $content = $response->json('choices.0.message.content');
+
+        if (! $content) {
+            throw new Exception('Empty response from OpenAI.');
+        }
+
+        return $this->parseJsonResponse($content);
+    }
+
+    /**
+     * Parse and clean the JSON response from the AI.
+     *
+     * @return array<string, array<string, string>>
+     */
+    protected function parseJsonResponse(string $content): array
+    {
+        $content = trim($content);
+
+        // Strip markdown code fences if present
+        $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
+        $content = preg_replace('/\s*```\s*$/', '', $content);
+        $content = trim($content);
+
+        $json = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Invalid JSON in translation response: ' . json_last_error_msg());
+        }
+
+        return $json;
+    }
+}
