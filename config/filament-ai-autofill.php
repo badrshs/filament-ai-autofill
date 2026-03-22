@@ -11,12 +11,13 @@ return [
     | Badrsh\FilamentAiAutofill\Contracts\Translator.
     |
     | Built-in options:
+    | - Badrsh\FilamentAiAutofill\Translators\LaravelAiTranslator::class (requires laravel/ai)
     | - Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class
     | - Badrsh\FilamentAiAutofill\Translators\NullTranslator::class
     |
     */
 
-    'translator' => Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class,
+    'translator' => Badrsh\FilamentAiAutofill\Translators\LaravelAiTranslator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -68,6 +69,23 @@ return [
     */
 
     'confirm_overwrite' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Laravel AI SDK Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the LaravelAiTranslator driver. This translator uses
+    | the Laravel AI SDK (laravel/ai) which supports multiple providers
+    | (OpenAI, Anthropic, Gemini, etc.) via your app's config/ai.php.
+    |
+    | Provider and model are configured in your app's config/ai.php file.
+    |
+    */
+
+    'laravel_ai' => [
+        'timeout' => env('AI_TIMEOUT', 60),
+    ],
 
     /*
     |--------------------------------------------------------------------------
