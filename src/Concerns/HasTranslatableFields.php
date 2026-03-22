@@ -41,8 +41,8 @@ trait HasTranslatableFields
      *   For suffix naming: source locale gets '' suffix, targets get '_en', '_fr', etc.
      *   For dot naming: source gets '.ar', target gets '.en', etc.
      * @param  string  $label  The tabs component label.
-     * @param  bool  $withBatchAction  Add a batch translate button to the source tab.
-     * @param  bool  $withFieldActions  Add inline translate icons to source tab fields.
+     * @param  bool|null  $withBatchAction  Add a batch translate button. Null = auto-detect (true when multiple fields).
+     * @param  bool|null  $withFieldActions  Add inline translate icons. Null = auto-detect (true when single field).
      * @param  string|null  $sourceLocale  Override the default source locale.
      * @param  array|null  $targetLocales  Override the default target locales.
      * @param  array|null  $locales  Override the full list of locales (source + targets).
@@ -50,8 +50,8 @@ trait HasTranslatableFields
     public static function translatableTabs(
         Closure $schemaCallback,
         string $label = '',
-        bool $withBatchAction = true,
-        bool $withFieldActions = false,
+        ?bool $withBatchAction = null,
+        ?bool $withFieldActions = null,
         ?string $sourceLocale = null,
         ?array $targetLocales = null,
         ?array $locales = null,
@@ -62,6 +62,26 @@ trait HasTranslatableFields
         $label = $label ?: __('filament-ai-autofill::ai-autofill.tabs.label');
 
         $fieldNaming = config('filament-ai-autofill.field_naming', 'auto');
+
+        // Auto-detect action mode when not explicitly set:
+        // count fields from the source locale schema callback
+        if ($withBatchAction === null || $withFieldActions === null) {
+            $sampleSuffix = static::buildSuffix($sourceLocale, $sourceLocale, $fieldNaming);
+            $sampleSchema = $schemaCallback($sourceLocale, $sampleSuffix);
+            $fieldCount = count(array_filter($sampleSchema, fn($c) => method_exists($c, 'getName') && $c->getName() !== null));
+
+            if ($withFieldActions === null && $withBatchAction === null) {
+                // Neither set: single field → sparkle per field, multiple → batch
+                $withFieldActions = $fieldCount <= 1;
+                $withBatchAction = $fieldCount > 1;
+            } elseif ($withFieldActions === null) {
+                // Batch explicitly set, auto-detect field actions as the opposite
+                $withFieldActions = ! $withBatchAction;
+            } else {
+                // Field actions explicitly set, auto-detect batch as the opposite
+                $withBatchAction = ! $withFieldActions;
+            }
+        }
 
         return Tabs::make($label)
             ->tabs(
@@ -91,7 +111,15 @@ trait HasTranslatableFields
                             if ($withBatchAction) {
                                 $schema[] = Actions::make([
                                     TranslateBatchAction::make()
-                                        ->schemaCallback($schemaCallback),
+                                        ->schemaCallback(
+                                            // Wrap so buildFromSchemaCallback always gets the correct
+                                            // suffix (empty, _en, .ar, etc.) regardless of what
+                                            // second argument it passes in.
+                                            fn (string $locale, string $_ignored) => $schemaCallback(
+                                                $locale,
+                                                static::buildSuffix($locale, $sourceLocale, $fieldNaming),
+                                            )
+                                        ),
                                 ]);
                             }
                         }
@@ -136,7 +164,14 @@ trait HasTranslatableFields
         string $fieldNaming,
     ): array {
         foreach ($schema as $component) {
-            if (! method_exists($component, 'getName') || ! method_exists($component, 'suffixAction')) {
+            if (! method_exists($component, 'getName')) {
+                continue;
+            }
+
+            $hasSuffixAction = method_exists($component, 'suffixAction');
+            $hasHintAction = method_exists($component, 'hintAction');
+
+            if (! $hasSuffixAction && ! $hasHintAction) {
                 continue;
             }
 
@@ -167,12 +202,18 @@ trait HasTranslatableFields
                 $targetFields[$locale] = $targetField;
             }
 
-            $component->suffixAction(
-                TranslateFieldAction::make('translate_' . $name)
-                    ->targetFields($targetFields)
-                    ->sourceLocale($sourceLocale)
-                    ->targetLocales($targetLocales),
-            );
+            $action = TranslateFieldAction::make('translate_' . $name)
+                ->sourceField($name)
+                ->targetFields($targetFields)
+                ->sourceLocale($sourceLocale)
+                ->targetLocales($targetLocales);
+
+            // Prefer suffixAction (inline icon), fall back to hintAction (top-right)
+            if ($hasSuffixAction) {
+                $component->suffixAction($action);
+            } else {
+                $component->hintAction($action);
+            }
         }
 
         return $schema;

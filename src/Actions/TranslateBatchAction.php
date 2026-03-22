@@ -247,6 +247,34 @@ class TranslateBatchAction extends Action
             $translator = $this->resolveTranslator();
             $translations = $translator->translate($dataToTranslate, $sourceLocale, $targetLocales);
 
+            // Normalize translation keys: AI may strip locale suffixes
+            // (e.g., return "title" instead of "title.ar" or "title_ar")
+            $sourceFieldKeys = array_keys($dataToTranslate);
+            $keyLookup = [];
+
+            foreach ($sourceFieldKeys as $field) {
+                $keyLookup[$field] = $field;
+
+                $stripped = preg_replace('/\.' . preg_quote($sourceLocale, '/') . '$/', '', $field);
+                if ($stripped !== $field) {
+                    $keyLookup[$stripped] = $field;
+                }
+
+                $stripped = preg_replace('/_' . preg_quote($sourceLocale, '/') . '$/', '', $field);
+                if ($stripped !== $field) {
+                    $keyLookup[$stripped] = $field;
+                }
+            }
+
+            $normalizedTranslations = [];
+
+            foreach ($translations as $key => $localeTranslations) {
+                $resolvedKey = $keyLookup[$key] ?? $key;
+                $normalizedTranslations[$resolvedKey] = $localeTranslations;
+            }
+
+            $translations = $normalizedTranslations;
+
             // Distribute translations to target fields
             $translatedCount = 0;
 
@@ -343,13 +371,18 @@ class TranslateBatchAction extends Action
      */
     protected function buildFromSchemaCallback(string $sourceLocale, array $targetLocales): TranslationConfig
     {
-        $sourceComponents = ($this->schemaCallback)($sourceLocale, strtoupper($sourceLocale));
+        $fieldNaming = $this->fieldNaming?->value
+            ?? config('filament-ai-autofill.field_naming', 'auto');
+
+        $sourceSuffix = $this->buildCallbackSuffix($sourceLocale, $sourceLocale, $fieldNaming);
+        $sourceComponents = ($this->schemaCallback)($sourceLocale, $sourceSuffix);
         $sourceFieldNames = static::extractFieldNames($sourceComponents);
 
         $fieldMap = [];
 
         foreach ($targetLocales as $targetLocale) {
-            $targetComponents = ($this->schemaCallback)($targetLocale, strtoupper($targetLocale));
+            $targetSuffix = $this->buildCallbackSuffix($targetLocale, $sourceLocale, $fieldNaming);
+            $targetComponents = ($this->schemaCallback)($targetLocale, $targetSuffix);
             $targetFieldNames = static::extractFieldNames($targetComponents);
 
             foreach ($sourceFieldNames as $index => $sourceName) {
@@ -360,6 +393,24 @@ class TranslateBatchAction extends Action
         }
 
         return new TranslationConfig($sourceLocale, $targetLocales, $fieldMap);
+    }
+
+    /**
+     * Build the suffix to pass to the schema callback, matching the logic
+     * in HasTranslatableFields::buildSuffix().
+     */
+    protected function buildCallbackSuffix(string $locale, string $sourceLocale, string $fieldNaming): string
+    {
+        if ($fieldNaming === 'dot') {
+            return ".{$locale}";
+        }
+
+        // Suffix mode (or auto): source locale has no suffix, targets have _locale
+        if ($locale === $sourceLocale) {
+            return '';
+        }
+
+        return "_{$locale}";
     }
 
     /**

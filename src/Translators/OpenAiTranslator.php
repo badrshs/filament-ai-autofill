@@ -14,14 +14,11 @@ class OpenAiTranslator implements Translator
 
     protected string $baseUrl;
 
-    protected int $timeout;
-
     public function __construct()
     {
         $this->apiKey = config('filament-ai-autofill.openai.key', config('services.openai.key', ''));
         $this->model = config('filament-ai-autofill.openai.model', 'gpt-4o-mini');
         $this->baseUrl = config('filament-ai-autofill.openai.base_url', 'https://api.openai.com/v1');
-        $this->timeout = (int) config('filament-ai-autofill.openai.timeout', 60);
     }
 
     /**
@@ -50,12 +47,12 @@ class OpenAiTranslator implements Translator
         $prompt = <<<PROMPT
         You are a professional translator. Translate the following JSON object from '{$sourceLocale}' to: {$targetList}.
 
-        TRANSLATION PRINCIPLES:
+        CRITICAL RULES:
+        - Keep ALL JSON key names EXACTLY as they appear in the input — do NOT rename, shorten, or modify keys in any way
         - Translate for MEANING and NATURAL EXPRESSION, not word-by-word
         - Each translation should sound like a native speaker wrote it
         - Preserve emotional tone and intent
         - Cultural idioms should become natural equivalents in the target language
-        - Rephrase awkward literal translations naturally
         - Preserve any HTML tags exactly as-is (do not translate tag names or attributes)
 
         Input JSON:
@@ -67,10 +64,12 @@ class OpenAiTranslator implements Translator
             "locale_code": "translated text"
           }
         }
+
+        Example: if input is {"title.ar": "مرحبا"} and target is en, output must be {"title.ar": {"en": "Hello"}}
         PROMPT;
 
         $response = Http::withToken($this->apiKey)
-            ->timeout($this->timeout)
+            ->timeout((int) config('filament-ai-autofill.openai.timeout', 60))
             ->post("{$this->baseUrl}/responses", [
                 'model' => $this->model,
                 'input' => [

@@ -27,6 +27,8 @@ class TranslateFieldAction extends Action
 {
     protected array $targetFields = [];
 
+    protected ?string $explicitSourceField = null;
+
     protected ?string $sourceLocale = null;
 
     protected ?array $targetLocales = null;
@@ -51,6 +53,17 @@ class TranslateFieldAction extends Action
             ->action(function (Get $get, Set $set): void {
                 $this->handleTranslation($get, $set);
             });
+    }
+
+    /**
+     * Explicitly set the source field name (bypasses getComponent() lookup).
+     * Use this when attaching the action programmatically.
+     */
+    public function sourceField(string $name): static
+    {
+        $this->explicitSourceField = $name;
+
+        return $this;
     }
 
     /**
@@ -118,7 +131,7 @@ class TranslateFieldAction extends Action
                 return;
             }
 
-            $sourceValue = $get('../' . $sourceFieldName);
+            $sourceValue = $get($sourceFieldName);
 
             if (! filled($sourceValue) || ! is_string($sourceValue)) {
                 Notification::make()
@@ -142,7 +155,7 @@ class TranslateFieldAction extends Action
                 $hasExisting = false;
 
                 foreach ($targetFieldMap as $fieldName) {
-                    $existingValue = $get('../' . $fieldName);
+                    $existingValue = $get($fieldName);
 
                     if (filled($existingValue)) {
                         $hasExisting = true;
@@ -174,10 +187,20 @@ class TranslateFieldAction extends Action
 
             $translatedCount = 0;
 
-            if (isset($translations[$fieldKey])) {
-                foreach ($translations[$fieldKey] as $locale => $translatedValue) {
+            // Normalize: AI may strip locale suffix from key (e.g., "title" instead of "title.ar")
+            $fieldTranslations = $translations[$fieldKey] ?? null;
+
+            if ($fieldTranslations === null) {
+                // Try matching by base name (strip locale suffix)
+                $baseKey = preg_replace('/[._]' . preg_quote($sourceLocale, '/') . '$/', '', $fieldKey);
+
+                $fieldTranslations = $translations[$baseKey] ?? null;
+            }
+
+            if ($fieldTranslations !== null) {
+                foreach ($fieldTranslations as $locale => $translatedValue) {
                     if (isset($targetFieldMap[$locale])) {
-                        $set('../' . $targetFieldMap[$locale], $translatedValue);
+                        $set($targetFieldMap[$locale], $translatedValue);
                         $translatedCount++;
                     }
                 }
@@ -199,14 +222,21 @@ class TranslateFieldAction extends Action
     }
 
     /**
-     * Get the source field name from the parent component.
+     * Get the source field name from the explicit setter or the parent component.
      */
     protected function getSourceFieldName(): string
     {
-        $component = $this->getComponent();
+        if ($this->explicitSourceField !== null) {
+            return $this->explicitSourceField;
+        }
 
-        if ($component && method_exists($component, 'getName')) {
-            return $component->getName();
+        // Fallback: try getComponent() on form component actions
+        if (method_exists($this, 'getComponent')) {
+            $component = $this->getComponent();
+
+            if ($component && method_exists($component, 'getName')) {
+                return $component->getName();
+            }
         }
 
         return '';

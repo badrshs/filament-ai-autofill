@@ -2,7 +2,7 @@
 
 ## Project
 
-Laravel/Filament package (`badrsh/filament-ai-autofill`) providing AI-powered translation for form fields. Supports Filament v3/v4/v5, Laravel 10–13, PHP 8.1+.
+Laravel/Filament package (`badrsh/filament-ai-autofill`) providing AI-powered translation for form fields. Supports Filament v3/v4/v5, Laravel 10–13, PHP 8.2+.
 
 
 ## Testing Workflow The "done" Command Loop ( SUPER CRITICAL )
@@ -39,7 +39,7 @@ vendor/bin/pest            # run all tests
 vendor/bin/pest --ci       # CI mode (used in GitHub Actions)
 ```
 
-No composer scripts — invoke Pest directly. CI matrix covers PHP 8.1–8.4.
+No composer scripts — invoke Pest directly. CI matrix covers PHP 8.2–8.4.
 
 ## Architecture
 
@@ -77,7 +77,7 @@ src/
 
 - **Namespace**: `Badrsh\FilamentAiAutofill`
 - **PHPDoc** on all public methods with `@param`/`@return` tags
-- **PHP 8.1 features**: named args, match expressions, union types, null coalescing
+- **PHP 8.2 features**: named args, match expressions, union types, null coalescing, readonly classes, enums
 - **Tests**: Pest syntax (`test()` + `expect()` fluent assertions), fixtures in `tests/Fixtures/`
 - **i18n**: translation files in `resources/lang/{en,ar}/`
 - **Filament compat**: version-specific code goes in `Support/FilamentCompat.php`
