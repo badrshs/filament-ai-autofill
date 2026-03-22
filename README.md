@@ -1,6 +1,6 @@
 # Filament AI Autofill
 
-AI-powered auto-translation for [Filament](https://filamentphp.com) form fields. Click a button, and your content is translated from one language to many — using OpenAI or any custom AI translator.
+AI-powered auto-translation for [Filament](https://filamentphp.com) form fields. Click a button, and your content is translated from one language to many, using OpenAI or any custom AI translator.
 
 ![Filament v3/v4/v5](https://img.shields.io/badge/Filament-v3%20%7C%20v4%20%7C%20v5-blue)
 ![Laravel](https://img.shields.io/badge/Laravel-10%2F11%2F12-red)
@@ -11,9 +11,9 @@ AI-powered auto-translation for [Filament](https://filamentphp.com) form fields.
 
 You have a Filament form with fields in Arabic (or any source language). You want the English (or other) fields filled in automatically. This package adds:
 
-1. **A sparkle ✨ icon** on individual fields — click it to translate that one field
-2. **An "Auto-translate All" button** — translates every source field in one API call
-3. **A tab helper** — builds AR / EN / FR tabs with translation built in
+1. **A sparkle ✨ icon** on individual fields, click it to translate that one field
+2. **An "Auto-translate All" button**, translates every source field in one API call
+3. **A tab helper**, builds AR / EN / FR tabs with translation built in
 
 All translations happen via OpenAI by default. You can plug in DeepL, Google Translate, or any custom translator.
 
@@ -316,7 +316,7 @@ php artisan vendor:publish --tag="filament-ai-autofill-translations"
 
 ## Filament Version Compatibility
 
-This package works with Filament v3, v4, and v5. It uses Filament v5 namespaces internally and includes an automatic compatibility layer (`FilamentCompat.php`) that aliases the older namespace classes on v3/v4. No extra configuration needed — install and go.
+This package works with Filament v3, v4, and v5. It uses Filament v5 namespaces internally and includes an automatic compatibility layer (`FilamentCompat.php`) that aliases the older namespace classes on v3/v4. No extra configuration needed, install and go.
 
 ## License
 
