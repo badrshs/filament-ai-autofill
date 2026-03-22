@@ -2,7 +2,7 @@
 
 AI-powered auto-translation for [Filament](https://filamentphp.com) form fields. Click a button, and your content is translated from one language to many, using OpenAI or any custom AI translator.
 
-![Filament v3/v4/v5](https://img.shields.io/badge/Filament-v3%20%7C%20v4%20%7C%20v5-blue)
+![Filament v4/v5](https://img.shields.io/badge/Filament-v4%20%7C%20v5-blue)
 ![Laravel](https://img.shields.io/badge/Laravel-10%2F11%2F12%2F13-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -24,7 +24,7 @@ All translations happen via the Laravel AI SDK when available (supports OpenAI, 
 |------------|----------|
 | PHP | 8.2+ |
 | Laravel | 10, 11, 12, 13 |
-| Filament | 3.x, 4.x, 5.x |
+| Filament | 4.x, 5.x |
 
 ## Installation
 
@@ -331,7 +331,7 @@ php artisan vendor:publish --tag="filament-ai-autofill-translations"
 
 ## Filament Version Compatibility
 
-This package works with Filament v3, v4, and v5. It uses Filament v5 namespaces internally and includes an automatic compatibility layer (`FilamentCompat.php`) that aliases the older namespace classes on v3/v4. No extra configuration needed, install and go.
+This package works with Filament v4 and v5. It uses Filament v5 namespaces internally and includes a compatibility layer (`FilamentCompat.php`) that aliases older namespace classes when needed. No extra configuration needed — install and go.
 
 ## License
 

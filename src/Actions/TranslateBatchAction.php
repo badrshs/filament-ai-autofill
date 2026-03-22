@@ -4,7 +4,7 @@ namespace Badrsh\FilamentAiAutofill\Actions;
 
 use Closure;
 use Exception;
-use Filament\Forms\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
