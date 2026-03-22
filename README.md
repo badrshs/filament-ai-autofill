@@ -18,6 +18,20 @@ You have a Filament form with fields in Arabic (or any source language). You wan
 
 All translations happen via the Laravel AI SDK when available (supports OpenAI, Anthropic, Gemini, and more). If `laravel/ai` is not installed or your environment doesn't meet its requirements (PHP 8.3+, Laravel 12+), the package automatically falls back to the built-in OpenAI translator. No configuration needed — it just works.
 
+
+## Example  1
+
+![chrome_0GEJ4nfliU](https://github.com/user-attachments/assets/230ffb10-a035-4278-ad56-b6a4b7e11c7d)
+
+## Example  2
+
+![chrome_nIofIM1GQt](https://github.com/user-attachments/assets/f665ec0c-6c09-4780-836e-a6cfbaa83415)
+
+
+## Example 3
+
+![chrome_H7rE98Xl19](https://github.com/user-attachments/assets/7da59d05-1daa-4f99-9293-b21bfcd55607)
+
 ## Requirements
 
 | Dependency | Versions |
