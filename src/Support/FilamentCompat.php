@@ -48,3 +48,16 @@ if (! class_exists(\Filament\Schemas\Components\Actions::class)) {
         class_alias(\Filament\Forms\Components\Actions::class, \Filament\Schemas\Components\Actions::class);
     }
 }
+
+// Form-level Action base class
+// v3/v4: Filament\Forms\Components\Actions\Action (extends Filament\Actions\Action)
+// v5:    Removed — use Filament\Actions\Action directly
+//
+// The package's action classes extend Filament\Forms\Components\Actions\Action
+// so they satisfy the v3 type-hints (suffixAction, hintAction, Actions::make).
+// On v5, where this class no longer exists, we alias it back to the unified class.
+if (! class_exists(\Filament\Forms\Components\Actions\Action::class)) {
+    if (class_exists(\Filament\Actions\Action::class)) {
+        class_alias(\Filament\Actions\Action::class, \Filament\Forms\Components\Actions\Action::class);
+    }
+}
