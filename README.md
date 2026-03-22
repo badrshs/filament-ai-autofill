@@ -3,26 +3,27 @@
 AI-powered auto-translation for [Filament](https://filamentphp.com) form fields. Click a button, and your content is translated from one language to many, using OpenAI or any custom AI translator.
 
 ![Filament v3/v4/v5](https://img.shields.io/badge/Filament-v3%20%7C%20v4%20%7C%20v5-blue)
-![Laravel](https://img.shields.io/badge/Laravel-10%2F11%2F12-red)
-![PHP](https://img.shields.io/badge/PHP-8.1%2B-purple)
+![Laravel](https://img.shields.io/badge/Laravel-10%2F11%2F12%2F13-red)
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## What It Does
 
 You have a Filament form with fields in Arabic (or any source language). You want the English (or other) fields filled in automatically. This package adds:
 
-1. **A sparkle ✨ icon** on individual fields, click it to translate that one field
-2. **An "Auto-translate All" button**, translates every source field in one API call
-3. **A tab helper**, builds AR / EN / FR tabs with translation built in
+1. **A sparkle ✨ icon** on individual fields — click it to translate that one field
+2. **An "Auto-translate All" button** — translates every source field in one API call
+3. **A tab helper** — builds AR / EN / FR tabs with translation built in
+4. **Smart auto-detection** — automatically picks sparkle or batch mode based on field count
 
-All translations happen via OpenAI by default. You can plug in DeepL, Google Translate, or any custom translator.
+All translations happen via the Laravel AI SDK by default (supports OpenAI, Anthropic, Gemini, and more). You can also use the built-in direct OpenAI translator, or plug in DeepL, Google Translate, or any custom translator.
 
 ## Requirements
 
 | Dependency | Versions |
 |------------|----------|
-| PHP | 8.1+ |
-| Laravel | 10, 11, 12 |
+| PHP | 8.2+ |
+| Laravel | 10, 11, 12, 13 |
 | Filament | 3.x, 4.x, 5.x |
 
 ## Installation
@@ -39,17 +40,30 @@ composer require badrsh/filament-ai-autofill
 php artisan vendor:publish --tag="filament-ai-autofill-config"
 ```
 
-### Step 3: Add your OpenAI key to `.env`
+### Step 3: Configure your AI provider
+
+**Option A: Laravel AI SDK (default, recommended)**
+
+Install the Laravel AI package and configure it:
+
+```bash
+composer require laravel/ai
+```
+
+Then follow the [Laravel AI docs](https://laravel.com/docs/ai) to set up your preferred provider (OpenAI, Anthropic, Gemini, etc.) in `config/ai.php`.
+
+**Option B: Direct OpenAI**
+
+If you prefer direct OpenAI calls without the Laravel AI SDK, change the translator in `config/filament-ai-autofill.php`:
+
+```php
+'translator' => \Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class,
+```
+
+Then add your OpenAI key to `.env`:
 
 ```env
 OPENAI_API_KEY=sk-your-key-here
-```
-
-You can also customize the model and base URL via environment variables:
-
-```env
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
 That's it. The package works out of the box with any Filament form.
@@ -116,13 +130,21 @@ class PostResource extends Resource
 static::translatableTabs(
     schemaCallback: fn (string $locale, string $suffix) => [...],
     label: 'Translations',       // Tab group label
-    withBatchAction: true,       // Show the "Auto-translate All" button
-    withFieldActions: false,     // Show sparkle icon on each source field
+    withBatchAction: null,       // null = auto-detect (true when multiple fields)
+    withFieldActions: null,      // null = auto-detect (true when single field)
     sourceLocale: 'ar',          // Override source locale
     targetLocales: ['en', 'fr'], // Override target locales
     locales: ['ar', 'en', 'fr'], // Override full locale list
 );
 ```
+
+**Smart auto-detection:** When you leave `withBatchAction` and `withFieldActions` as `null` (the default), the package automatically chooses the best mode:
+- **1 field** → sparkle icon on the field (per-field action)
+- **2+ fields** → batch "Auto-translate All" button
+
+You can override this by passing `true` or `false` explicitly. Setting one automatically sets the other to its opposite.
+
+**Textarea & RichEditor support:** The sparkle action works on all field types. Fields that don't support suffix icons (like `Textarea`) use a hint icon (top-right) instead.
 
 ### Approach 2: Inline Per-Field Action
 
@@ -140,7 +162,7 @@ Forms\Components\TextInput::make('title')
 
 **What happens:**
 - A sparkle icon appears on the right side of the `title` field
-- Clicking it sends the Arabic text to OpenAI and fills `title_en` and `title_fr`
+- Clicking it sends the Arabic text to your AI translator and fills `title_en` and `title_fr`
 
 **Options:**
 
@@ -197,7 +219,8 @@ After publishing, edit `config/filament-ai-autofill.php`:
 ```php
 return [
     // The translator class (must implement Badrsh\FilamentAiAutofill\Contracts\Translator)
-    'translator' => \Badrsh\FilamentAiAutofill\Translators\OpenAiTranslator::class,
+    // Default: LaravelAiTranslator (requires laravel/ai). Use OpenAiTranslator for direct OpenAI calls.
+    'translator' => \Badrsh\FilamentAiAutofill\Translators\LaravelAiTranslator::class,
 
     // The language your content is written in
     'source_locale' => 'ar',
@@ -211,11 +234,17 @@ return [
     // Ask before overwriting fields that already have content
     'confirm_overwrite' => true,
 
-    // OpenAI settings (all configurable via .env)
+    // Laravel AI SDK settings (for LaravelAiTranslator, requires laravel/ai)
+    'laravel_ai' => [
+        'timeout' => env('AI_TIMEOUT', 60),
+    ],
+
+    // OpenAI settings (for OpenAiTranslator, all configurable via .env)
     'openai' => [
         'key'      => env('OPENAI_API_KEY'),
         'model'    => env('OPENAI_MODEL', 'gpt-4o-mini'),
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+        'timeout'  => env('OPENAI_TIMEOUT', 60),
     ],
 ];
 ```
@@ -224,10 +253,11 @@ return [
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |
+| `OPENAI_API_KEY` | *(required for OpenAiTranslator)* | Your OpenAI API key |
 | `OPENAI_MODEL` | `gpt-4o-mini` | The model to use for translations |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | API base URL (change for proxies or compatible APIs) |
 | `OPENAI_TIMEOUT` | `60` | HTTP timeout in seconds per request. Increase if you hit timeouts on large texts |
+| `AI_TIMEOUT` | `60` | HTTP timeout for the Laravel AI SDK translator |
 
 ---
 
